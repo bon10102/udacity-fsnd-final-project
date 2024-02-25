@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 
 from models import db, setup_db, Movie, Actor
+from auth import AuthError, requires_auth
 
 def create_app(test_config=None):
 
@@ -28,7 +29,8 @@ def create_app(test_config=None):
         return response
 
     @app.route("/actors", methods=["GET"])
-    def get_actors():
+    @requires_auth("get:actors")
+    def get_actors(jwt):
         actors = Actor.query.order_by("name").all()
         if (len(actors) == 0):
             abort(404)
@@ -40,7 +42,8 @@ def create_app(test_config=None):
         })
 
     @app.route("/movies", methods=["GET"])
-    def get_movies():
+    @requires_auth("get:movies")
+    def get_movies(jwt):
         movies = Movie.query.order_by("title").all()
         if (len(movies) == 0):
             abort(404)
@@ -52,7 +55,8 @@ def create_app(test_config=None):
         })
     
     @app.route("/actors/<int:actor_id>", methods=["DELETE"])
-    def delete_actor(actor_id):
+    @requires_auth("delete:actors")
+    def delete_actor(jwt, actor_id):
         error = False
         try:
             actor = db.session.get(Actor, actor_id)
@@ -74,7 +78,8 @@ def create_app(test_config=None):
                 })
             
     @app.route("/movies/<int:movie_id>", methods=["DELETE"])
-    def delete_movie(movie_id):
+    @requires_auth("delete:movies")
+    def delete_movie(jwt, movie_id):
         error = False
         try:
             movie = db.session.get(Movie, movie_id)
@@ -96,7 +101,8 @@ def create_app(test_config=None):
                 })
             
     @app.route("/actors", methods=["POST"])
-    def create_actor():
+    @requires_auth("post:actors")
+    def create_actor(jwt):
         body = request.get_json()
         if body.get("name", None) is None:
             abort(400)
@@ -120,7 +126,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/movies", methods=["POST"])
-    def create_movie():
+    @requires_auth("post:movies")
+    def create_movie(jwt):
         body = request.get_json()
         if body.get("title", None) is None:
             abort(400)
@@ -143,7 +150,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route("/actors/<int:actor_id>", methods=["PATCH"])
-    def edit_actor(actor_id):
+    @requires_auth("patch:actors")
+    def edit_actor(jwt, actor_id):
         error = False
         try:
             actor = db.session.get(Actor, actor_id)
@@ -175,7 +183,8 @@ def create_app(test_config=None):
                 })
             
     @app.route("/movies/<int:movie_id>", methods=["PATCH"])
-    def edit_movie(movie_id):
+    @requires_auth("patch:movies")
+    def edit_movie(jwt, movie_id):
         error = False
         try:
             movie = db.session.get(Movie, movie_id)
@@ -235,5 +244,13 @@ def create_app(test_config=None):
         return (
             jsonify({"success": False, "error": 500, "message": "internal server error"})
         )
+    
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        return jsonify({
+            "success": False,
+            "error": error.status_code,
+            "message": error.error
+        }), error.status_code
     
     return app
