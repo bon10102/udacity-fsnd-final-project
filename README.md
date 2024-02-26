@@ -296,7 +296,7 @@ Sample response:
 }
 ```
 
-### `PATCH '/actors'`
+### `PATCH '/actors/actor_id'`
 
 Edit an actor.
 Sample response:
@@ -307,7 +307,7 @@ Sample response:
 }
 ```
 
-### `PATCH '/movies'`
+### `PATCH '/movies/movie_id'`
 
 Edit a movie.
 Sample response:
@@ -318,7 +318,7 @@ Sample response:
 }
 ```
 
-### `DELETE '/actors'`
+### `DELETE '/actors/actor_id'`
 
 Delete an actor.
 Sample response:
@@ -345,7 +345,7 @@ Sample response:
 }
 ```
 
-### `DELETE '/movies'`
+### `DELETE '/movies/movie_id'`
 
 Delete a movie.
 Sample response:
